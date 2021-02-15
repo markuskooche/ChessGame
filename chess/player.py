@@ -17,4 +17,10 @@ class Player(ABC):
         self.name = name
 
 
-# TODO: maybe add ComputerizedPlayer(Player) [= abstract]
+class ComputerizedPlayer(Player, ABC):
+    def __init__(self, color: str, name: str):
+        super().__init__(color=color, name=name)
+
+    @abstractmethod
+    def best_move(self, board: object) -> object:
+        pass

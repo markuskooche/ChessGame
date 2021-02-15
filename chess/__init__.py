@@ -1,10 +1,11 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 
 import chess.figures as figure
-from chess.players import HumanPlayer
+from chess.player import ComputerizedPlayer
+from chess.players import HumanPlayer, RandomPlayer
 from chess.board import Board
 from chess.move import Move
 import pygame
@@ -19,7 +20,7 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
 class Game:
     players: dict = {
         '1': HumanPlayer(color='white', name='Markus'),
-        '2': HumanPlayer(color='black', name='Computer')
+        '2': RandomPlayer(color='black')
     }
 
     def __init__(self):
@@ -75,6 +76,12 @@ class Game:
                         self.board.move_piece(player_move)
                         self.player = (self.player % 2) + 1
                         player_selection: list[tuple] = []
+
+                        if isinstance(self.players.get(str(self.player)), ComputerizedPlayer):
+                            best_move = self.players.get(str(self.player)).best_move(self.board)
+                            self.board.move_piece(best_move)
+                            self.player = (self.player % 2) + 1
+
                         self.draw()
 
     def draw(self):
