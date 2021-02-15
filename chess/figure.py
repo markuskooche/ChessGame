@@ -13,7 +13,7 @@ class Figure(ABC):
         return f'{self.player.color[0]}_{self.figure}'
 
     def get_position(self) -> str:
-        return 'ABCDEFGH'[self.column] + '87654321'[self.row]
+        return 'abcdefgh'[self.column] + '87654321'[self.row]
 
     def set_position(self, row: int, column: int):
         self.column = column
@@ -33,12 +33,12 @@ class Figure(ABC):
 
         return positions
 
-    def iterative_moves(self, it_column: int, it_row: int, board: object) -> list[tuple]:
+    def iterative_moves(self, row_factor: int, column_factor: int, board: object) -> list[tuple]:
         positions: list[tuple] = []
 
         for i in range(1, 8):
-            new_column: int = self.column + it_column * i
-            new_row: int = self.row + it_row * i
+            new_column: int = self.column + column_factor * i
+            new_row: int = self.row + row_factor * i
 
             if (new_row in range(0, 8)) and (new_column in range(0, 8)):
                 figure = board.get_piece(row=new_row, column=new_column)

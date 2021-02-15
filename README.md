@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.2
+Current Version: 0.2.1
 
 ## how to start the game
 please install python3, pygame and numpy
@@ -22,3 +22,4 @@ To reset a move, press the 'r' key.
 |---------|---------------------------------------|
 | 0.1     | gui and moves created                 |
 | 0.2     | figure classes and player class added |
+| 0.2.1   | basic figure moves added              |

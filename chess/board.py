@@ -25,7 +25,7 @@ class Board:
                 self.board[r][c] = figure.Blank(row=r, column=c)
 
         for c in range(8):
-            self.board[1][c] = figure.Pawn(player=black, row=6, column=c)
+            self.board[1][c] = figure.Pawn(player=black, row=1, column=c)
             self.board[6][c] = figure.Pawn(player=white, row=6, column=c)
 
         self.board[7][0] = figure.Rook(player=white, row=7, column=0)

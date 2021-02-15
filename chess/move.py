@@ -1,8 +1,5 @@
 class Move:
-    ROW = '87654321'
-    COLUMN = 'ABCDEFGH'
-
-    def __init__(self, start_position, end_position, board):
+    def __init__(self, start_position: tuple, end_position: tuple, board: object):
         self.start_row = start_position[0]
         self.start_column = start_position[1]
 
@@ -17,8 +14,9 @@ class Move:
         end = self.get_position(self.end_row, self.end_column)
         return start + end
 
-    def get_position(self, row, column) -> str:
-        return self.COLUMN[column] + self.ROW[row]
+    @staticmethod
+    def get_position(row: int, column: int) -> str:
+        return 'abcdefgh'[column] + '87654321'[row]
 
     def __repr__(self):
         start = self.get_position(self.start_row, self.start_column)

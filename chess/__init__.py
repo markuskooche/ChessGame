@@ -1,6 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.2"
+__version__ = "0.2.1"
 
 
 import chess.figures as figure
@@ -10,12 +10,10 @@ from chess.move import Move
 import pygame
 
 
+SIZE: int = 60
 IMAGES: dict = {}
 COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
                             'yellow': (250, 250, 140), 'red': (250, 110, 70)}
-
-MAX_FPS: int = 30
-SIZE: int = 60
 
 
 class Game:
