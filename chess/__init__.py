@@ -1,6 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 
 import chess.figures as figure
@@ -20,6 +20,7 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
 class Game:
     players: dict = {
         '1': HumanPlayer(color='white', name='Markus'),
+        #'2': HumanPlayer(color='black', name='Test')
         '2': RandomPlayer(color='black')
     }
 

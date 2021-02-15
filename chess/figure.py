@@ -22,7 +22,7 @@ class Figure(ABC):
     def offset_moves(self, offsets: list[tuple], board: object) -> list[tuple]:
         positions: list[tuple] = []
 
-        for (column_off, row_off) in offsets:
+        for (row_off, column_off) in offsets:
             new_column: int = self.column + column_off
             new_row: int = self.row + row_off
 
