@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from chess.move import Move
 
 
 class Figure(ABC):
@@ -12,15 +13,18 @@ class Figure(ABC):
     def load_image(self) -> str:
         return f'{self.player.color[0]}_{self.figure}'
 
+    """
     def get_position(self) -> str:
         return 'abcdefgh'[self.column] + '87654321'[self.row]
+    """
 
     def set_position(self, row: int, column: int):
         self.column = column
         self.row = row
 
-    def offset_moves(self, offsets: list[tuple], board: object) -> list[tuple]:
-        positions: list[tuple] = []
+    def offset_moves(self, offsets: list[tuple], board: object) -> list[object]:
+        positions: list[object] = []
+        start: tuple = (self.row, self.column)
 
         for (row_off, column_off) in offsets:
             new_column: int = self.column + column_off
@@ -29,12 +33,13 @@ class Figure(ABC):
             if (new_row in range(0, 8)) and (new_column in range(0, 8)):
                 figure = board.get_piece(row=new_row, column=new_column)
                 if figure.player is not self.player:
-                    positions.append((new_row, new_column))
+                    positions.append(Move(start, (new_row, new_column), board))
 
         return positions
 
-    def iterative_moves(self, row_factor: int, column_factor: int, board: object) -> list[tuple]:
-        positions: list[tuple] = []
+    def iterative_moves(self, row_factor: int, column_factor: int, board: object) -> list[object]:
+        positions: list[object] = []
+        start: tuple = (self.row, self.column)
 
         for i in range(1, 8):
             new_column: int = self.column + column_factor * i
@@ -43,7 +48,7 @@ class Figure(ABC):
             if (new_row in range(0, 8)) and (new_column in range(0, 8)):
                 figure = board.get_piece(row=new_row, column=new_column)
                 if figure.player is not self.player:
-                    positions.append((new_row, new_column))
+                    positions.append(Move(start, (new_row, new_column), board))
 
                     # End the loop if it is an enemy figure.
                     # This prevents the jumping over of figures.

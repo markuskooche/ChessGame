@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.2.3
+Current Version: 0.3
 
 ## how to start the game
 please install python3, pygame and numpy
@@ -15,7 +15,8 @@ python3 main.py
 Click on a field to select a figure.
 Click on another field to execute the move.
 
-To reset a move, press the 'r' key.
+To reset a move, press the key 'r'.
+To delete a selection, press the key 'd'.
 
 ## changelog
 | version | changelog                             |
@@ -25,3 +26,4 @@ To reset a move, press the 'r' key.
 | 0.2.1   | basic figure moves added              |
 | 0.2.2   | stupid random player added            |
 | 0.2.3   | pawn attack moves added               |
+| 0.3     | check and checkmate added             |

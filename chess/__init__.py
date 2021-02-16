@@ -1,6 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.2.3"
+__version__ = "0.3"
 
 
 import chess.figures as figure
@@ -20,25 +20,27 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
 class Game:
     players: dict = {
         '1': HumanPlayer(color='white', name='Markus'),
-        #'2': HumanPlayer(color='black', name='Test')
         '2': RandomPlayer(color='black')
+
+        # '2': HumanPlayer(color='black', name='Random')
     }
 
     def __init__(self):
         Game.load_pieces()
-        player_selection: list[tuple] = []
-        self.pieces_changed: bool = True
-        self.board_changed: bool = True
-        self.valid_moves: list = []
-        self.player: int = 1
 
+        selected_move: object = None
+        saved_selection: tuple = ()
         running: bool = True
 
         pygame.init()
         pygame.display.set_caption('Chess')
-        self.display = pygame.display.set_mode((8 * SIZE, 8 * SIZE))
         self.board = Board(self.players)
-        self.draw()
+        self.players.get('1').set_opponent(self.board)
+        self.players.get('2').set_opponent(self.board)
+        self.display = pygame.display.set_mode((8 * SIZE, 8 * SIZE))
+        self.player: int = 1
+
+        self.__draw()
 
         while running:
             for event in pygame.event.get():
@@ -46,10 +48,17 @@ class Game:
                     running: bool = False
 
                 elif event.type == pygame.KEYDOWN:
+                    # undoes the last move
                     if event.key == pygame.K_r:
                         self.player = (self.player % 2) + 1
+                        saved_selection: tuple = ()
                         self.board.undo_move()
-                        self.draw()
+                        self.__draw()
+
+                    # removes the selection
+                    elif event.key == pygame.K_d:
+                        saved_selection: tuple = ()
+                        self.__draw()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     location: tuple = pygame.mouse.get_pos()
@@ -58,44 +67,58 @@ class Game:
 
                     selected: tuple = (row, column)
                     selected_figure: object = self.board.get_piece(row=selected[0], column=selected[1])
+                    actual_player: object = self.players.get(str(self.player))
 
-                    if (len(player_selection) == 0) and (selected_figure.player == self.players.get(str(self.player))):
-                        self.valid_moves = selected_figure.legal_moves(self.board)
-                        if len(self.valid_moves) != 0:
-                            self.highlight_board(row=selected[0], column=selected[1], color=COLORS.get('yellow'))
-                            player_selection.append(selected)
+                    # No valid piece is selected yet
+                    if (len(saved_selection) == 0) and (selected_figure.player == actual_player):
+                        self.valid_moves = actual_player.legal_moves(self.board)
+
+                        for valid_move in self.valid_moves:
+                            if (valid_move.start_row == selected[0]) and (valid_move.start_column == selected[1]):
+                                self.__highlight_spot(position=selected, color=COLORS.get('yellow'))
+                                saved_selection = selected
+                                break
                         else:
-                            self.highlight_board(row=selected[0], column=selected[1], color=COLORS.get('red'))
-                        print(self.valid_moves)
-                    elif (len(player_selection) == 1) and (selected in self.valid_moves):
-                        player_selection.append(selected)
+                            self.__highlight_spot(position=selected, color=COLORS.get('red'))
+
+                    # A piece is already selected but no final position yet
+                    elif len(saved_selection) == 2:
+                        for valid_move in self.valid_moves:
+                            check_move: object = Move(saved_selection, selected, self.board)
+                            if check_move.code() == valid_move.code():
+                                selected_move = check_move
+                                saved_selection = ()
+                                break
+
+                    # The selected piece is not your own piece
                     else:
-                        self.highlight_board(row=selected[0], column=selected[1], color=COLORS.get('red'))
+                        self.__highlight_spot(position=selected, color=COLORS.get('red'))
 
-                    if len(player_selection) == 2:
-                        player_move: object = Move(player_selection[0], player_selection[1], self.board)
-                        self.board.move_piece(player_move)
+                    # Moves the selected piece with a valid move
+                    if selected_move is not None:
+                        self.board.move_piece(selected_move)
                         self.player = (self.player % 2) + 1
-                        player_selection: list[tuple] = []
+                        selected_move = None
 
+                        # If it is a ComputerizedPlayer a computerized move is executed
                         if isinstance(self.players.get(str(self.player)), ComputerizedPlayer):
                             best_move = self.players.get(str(self.player)).best_move(self.board)
-                            self.board.move_piece(best_move)
                             self.player = (self.player % 2) + 1
+                            self.board.move_piece(best_move)
 
-                        self.draw()
+                        self.__draw()
 
-    def draw(self):
-        self.draw_board()
-        self.draw_pieces()
+    def __draw(self):
+        self.__draw_board()
+        self.__draw_pieces()
 
-    def draw_board(self):
+    def __draw_board(self):
         for r in range(8):
             for c in range(8):
                 color: str = 'white' if ((r + c) % 2 == 0) else 'gray'
                 pygame.draw.rect(self.display, COLORS.get(color), pygame.Rect((c * SIZE), (r * SIZE), SIZE, SIZE))
 
-    def draw_pieces(self):
+    def __draw_pieces(self):
         for r in range(8):
             for c in range(8):
                 piece = self.board.get_piece(row=r, column=c)
@@ -103,10 +126,15 @@ class Game:
                     self.display.blit(IMAGES[piece.load_image()], pygame.Rect((c * SIZE), (r * SIZE), SIZE, SIZE))
         pygame.display.flip()
 
-    def highlight_board(self, row: int, column: int, color: tuple):
-        self.draw_board()
-        pygame.draw.rect(self.display, color, pygame.Rect((column * SIZE), (row * SIZE), SIZE, SIZE))
-        self.draw_pieces()
+    def __highlight_spot(self, position: tuple, color: tuple):
+        # TODO: how to remove this?
+        # TODO: if i can remove -> more colors possible but problem with overlaying pieces
+        self.__draw_board()
+
+        column: int = (position[1] * SIZE)
+        row: int = (position[0] * SIZE)
+        pygame.draw.rect(self.display, color, pygame.Rect(column, row, SIZE, SIZE))
+        self.__draw_pieces()
 
     @staticmethod
     def load_pieces():

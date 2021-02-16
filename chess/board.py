@@ -20,7 +20,7 @@ class Board:
         self.board[0][6] = figure.Knight(player=black, row=0, column=6)
         self.board[0][7] = figure.Rook(player=black, row=0, column=7)
 
-        for r in range(2, 6):
+        for r in range(1, 7):
             for c in range(8):
                 self.board[r][c] = figure.Blank(row=r, column=c)
 
@@ -47,6 +47,10 @@ class Board:
         self.board[move.start_row][move.start_column] = figure.Blank(move.start_row, move.start_column)
         self.board[move.end_row][move.end_column] = move.moved_piece
         move.moved_piece.set_position(move.end_row, move.end_column)
+        if isinstance(move.moved_piece, figure.King):
+            move.moved_piece.player.king_position = (move.end_row, move.end_column)
+        if isinstance(move.moved_piece, figure.Pawn):
+            move.moved_piece.initial_position = False
         self.white_move = not self.white_move
         self.move_log.append(move)
 
@@ -59,6 +63,16 @@ class Board:
             self.board[move.start_row][move.start_column] = move.moved_piece
             self.board[move.end_row][move.end_column] = move.captured_piece
             move.moved_piece.set_position(move.start_row, move.start_column)
+            if isinstance(move.moved_piece, figure.King):
+                move.moved_piece.player.king_position = (move.start_row, move.start_column)
+            if isinstance(move.moved_piece, figure.Pawn):
+                if move.moved_piece.player.color == 'white':
+                    if move.start_row == 6:
+                        move.moved_piece.initial_position = True
+                else:
+                    if move.start_row == 1:
+                        move.moved_piece.initial_position = True
+
             self.white_move = not self.white_move
 
     def print_console(self):
