@@ -1,7 +1,9 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.3"
+__version__ = "0.3.1"
 
+
+from time import process_time
 
 import chess.figures as figure
 from chess.player import ComputerizedPlayer
@@ -71,7 +73,10 @@ class Game:
 
                     # No valid piece is selected yet
                     if (len(saved_selection) == 0) and (selected_figure.player == actual_player):
+                        start = process_time()
                         self.valid_moves = actual_player.legal_moves(self.board)
+                        end = process_time()
+                        print(f"'{actual_player.name}' TIME: {round(((end - start) * 1000), 2)}ms")
 
                         for valid_move in self.valid_moves:
                             if (valid_move.start_row == selected[0]) and (valid_move.start_column == selected[1]):
@@ -102,7 +107,10 @@ class Game:
 
                         # If it is a ComputerizedPlayer a computerized move is executed
                         if isinstance(self.players.get(str(self.player)), ComputerizedPlayer):
+                            start = process_time()
                             best_move = self.players.get(str(self.player)).best_move(self.board)
+                            end = process_time()
+                            print(f"'{actual_player.opponent.name}' TIME: {round(((end - start) * 1000), 2)}ms")
                             self.player = (self.player % 2) + 1
                             self.board.move_piece(best_move)
 

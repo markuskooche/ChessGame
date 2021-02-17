@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.3
+Current Version: 0.3.1
 
 ## how to start the game
 please install python3, pygame and numpy
@@ -27,3 +27,4 @@ To delete a selection, press the key 'd'.
 | 0.2.2   | stupid random player added            |
 | 0.2.3   | pawn attack moves added               |
 | 0.3     | check and checkmate added             |
+| 0.3.1   | small optimizations for legal_moves   |

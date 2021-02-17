@@ -7,10 +7,13 @@ class HumanPlayer(Player):
     def __init__(self, color: str, name: str):
         super().__init__(color=color, name=name)
 
+    def legal_moves(self, board: object) -> object:
+        return self.legal_moves_simple(board)
+
 
 class RandomPlayer(ComputerizedPlayer):
     def __init__(self, color: str):
-        super().__init__(color=color, name='RandomPlayer')
+        super().__init__(color=color, name='Random')
 
     def best_move(self, board: object) -> object:
         try:

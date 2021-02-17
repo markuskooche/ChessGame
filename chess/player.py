@@ -1,17 +1,15 @@
-import base64
-import os
 from abc import ABC, abstractmethod
 from chess.figures import Blank, King
+import base64
 import sys
+import os
+
 
 COLORS: list[str] = ['white', 'black']
 
 
 class Player(ABC):
     def __init__(self, color: str, name: str):
-        # TODO: not sure if this plan will work
-        # self.player_moves = {}
-
         self.code = base64.b32encode(os.urandom(4))[:6].decode('UTF-8')
         self.opponent: object = None
         self.name = name
@@ -35,7 +33,7 @@ class Player(ABC):
                             break
 
             if self.opponent is None:
-                raise Exception(f'It is not possible to set the player!')
+                raise Exception('It is not possible to set the player!')
 
     def get_figures(self, board: object) -> list[object]:
         figures: list[object] = []
@@ -48,6 +46,26 @@ class Player(ABC):
                         figures.append(figure)
 
         return figures
+
+    # This allows the HumanPlayer to move pieces that protect the king
+    def legal_moves_simple(self, board) -> list[object]:
+        moves: list[object] = []
+
+        for figure in self.get_figures(board):
+            for move in figure.legal_moves(board):
+                if move is not []:
+                    moves.append(move)
+
+        return moves
+
+    @abstractmethod
+    def legal_moves(self, board: object) -> object:
+        pass
+
+
+class ComputerizedPlayer(Player, ABC):
+    def __init__(self, color: str, name: str):
+        super().__init__(color=color, name=name)
 
     def is_check(self, board: object) -> bool:
         return self.__square_under_attack(row=self.king_position[0], column=self.king_position[1], board=board)
@@ -66,8 +84,9 @@ class Player(ABC):
 
         return False
 
+    # This algorithm detects protective pieces and removes his moves
     def legal_moves(self, board: object) -> list[object]:
-        own_moves: list[object] = self.__valid_moves(board)
+        own_moves: list[object] = self.legal_moves_simple(board)
 
         for i in range((len(own_moves) - 1), -1, -1):
             board.move_piece(own_moves[i])
@@ -84,22 +103,6 @@ class Player(ABC):
             sys.exit()
 
         return own_moves
-
-    def __valid_moves(self, board) -> list[object]:
-        # print(f"'{self.name}' IS CHECK: {self.is_check(board)}")
-        moves: list[object] = []
-
-        for figure in self.get_figures(board):
-            for move in figure.legal_moves(board):
-                if move is not []:
-                    moves.append(move)
-
-        return moves
-
-
-class ComputerizedPlayer(Player, ABC):
-    def __init__(self, color: str, name: str):
-        super().__init__(color=color, name=name)
 
     @abstractmethod
     def best_move(self, board: object) -> object:
