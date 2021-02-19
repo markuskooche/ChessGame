@@ -40,6 +40,9 @@ class Board:
     def get_piece(self, row: int, column: int) -> str:
         return self.board[row][column]
 
+    def set_piece(self, row: int, column: int, set_piece: object):
+        self.board[row][column] = set_piece
+
     def move_piece(self, move: object):
         """
         Executes the move and updates the board and the position of the figure.
@@ -49,12 +52,10 @@ class Board:
         move.moved_piece.set_position(move.end_row, move.end_column)
         if isinstance(move.moved_piece, figure.King):
             move.moved_piece.player.king_position = (move.end_row, move.end_column)
-        if isinstance(move.moved_piece, figure.Pawn):
-            move.moved_piece.initial_position = False
         self.white_move = not self.white_move
         self.move_log.append(move)
 
-    def undo_move(self):
+    def undo_move(self) -> bool:
         """
         Undoes the move and resets the board and the position of the figure.
         """
@@ -65,15 +66,12 @@ class Board:
             move.moved_piece.set_position(move.start_row, move.start_column)
             if isinstance(move.moved_piece, figure.King):
                 move.moved_piece.player.king_position = (move.start_row, move.start_column)
-            if isinstance(move.moved_piece, figure.Pawn):
-                if move.moved_piece.player.color == 'white':
-                    if move.start_row == 6:
-                        move.moved_piece.initial_position = True
-                else:
-                    if move.start_row == 1:
-                        move.moved_piece.initial_position = True
-
             self.white_move = not self.white_move
+            return True
+
+        # important for setting the player back to 1
+        else:
+            return False
 
     def print_console(self):
         for r in range(8):

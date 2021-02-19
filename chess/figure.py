@@ -13,49 +13,49 @@ class Figure(ABC):
     def load_image(self) -> str:
         return f'{self.player.color[0]}_{self.figure}'
 
-    """
-    def get_position(self) -> str:
-        return 'abcdefgh'[self.column] + '87654321'[self.row]
-    """
-
     def set_position(self, row: int, column: int):
         self.column = column
         self.row = row
 
-    def offset_moves(self, offsets: list[tuple], board: object) -> list[object]:
-        positions: list[object] = []
-        start: tuple = (self.row, self.column)
+    def prepare_directions(self, directions: list[tuple], pins: list[tuple]) -> list[tuple]:
+        calculated_directions = directions
 
-        for (row_off, column_off) in offsets:
-            new_column: int = self.column + column_off
-            new_row: int = self.row + row_off
+        if len(pins) != 0:
+            for pin in pins:
+                if (self.row == pin[0]) and (self.column == pin[1]):
+                    calculated_directions.clear()
 
-            if (new_row in range(0, 8)) and (new_column in range(0, 8)):
-                figure = board.get_piece(row=new_row, column=new_column)
-                if figure.player is not self.player:
-                    positions.append(Move(start, (new_row, new_column), board))
+                    # append pinned direction to go to the opponent
+                    # append opposite direction to go to the king
+                    calculated_directions.append((pin[2], pin[3]))
+                    calculated_directions.append(((-1) * pin[2], (-1) * pin[3]))
+                    break
 
-        return positions
+        return calculated_directions
 
-    def iterative_moves(self, row_factor: int, column_factor: int, board: object) -> list[object]:
+    def iterative_moves(self, direction: tuple, board: object) -> list[object]:
         positions: list[object] = []
         start: tuple = (self.row, self.column)
 
         for i in range(1, 8):
-            new_column: int = self.column + column_factor * i
-            new_row: int = self.row + row_factor * i
+            new_column: int = self.column + (i * direction[1])
+            new_row: int = self.row + (i * direction[0])
 
             if (new_row in range(0, 8)) and (new_column in range(0, 8)):
                 figure = board.get_piece(row=new_row, column=new_column)
                 if figure.player is not self.player:
                     positions.append(Move(start, (new_row, new_column), board))
 
-                    # End the loop if it is an enemy figure.
-                    # This prevents the jumping over of figures.
+                    # ends the loop if it is an enemy figure
+                    # this prevents the jumping over of figures
                     if figure.player is not None:
                         break
                 else:
                     break
+
+            # to improve speed
+            else:
+                break
 
         return positions
 

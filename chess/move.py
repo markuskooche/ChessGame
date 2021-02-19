@@ -10,24 +10,13 @@ class Move:
         self.captured_piece = board.get_piece(self.end_row, self.end_column)
 
     def code(self) -> str:
-        # faster
-        # return (1000 * self.start_row) + (100 * self.start_column) + (10 * self.end_row) + self.end_column
         start = Move.get_position(self.start_row, self.start_column)
         end = Move.get_position(self.end_row, self.end_column)
         return f'{start}{end}'
-
-    """
-    def get_notation(self) -> str:
-        start = self.get_position(self.start_row, self.start_column)
-        end = self.get_position(self.end_row, self.end_column)
-        return start + end
-    """
 
     @staticmethod
     def get_position(row: int, column: int) -> str:
         return 'abcdefgh'[column] + '87654321'[row]
 
     def __repr__(self):
-        start = self.get_position(self.start_row, self.start_column)
-        end = self.get_position(self.end_row, self.end_column)
-        return f'{start}->{end}'
+        return self.code()

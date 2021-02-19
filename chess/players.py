@@ -7,6 +7,8 @@ class HumanPlayer(Player):
     def __init__(self, color: str, name: str):
         super().__init__(color=color, name=name)
 
+    # pins are not checked at a HumanPlayer
+    # the player is responsible for this himself
     def legal_moves(self, board: object) -> object:
         return self.legal_moves_simple(board)
 
