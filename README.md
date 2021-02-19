@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.3.2
+Current Version: 0.3.3
 
 ## how to start the game
 please install python3, pygame and numpy
@@ -29,3 +29,4 @@ To delete a selection, press the key 'd'.
 | 0.3     | check and checkmate added             |
 | 0.3.1   | small optimizations for legal_moves   |
 | 0.3.2   | faster algorithm for legal_moves      |
+| 0.3.3   | 'king checking king'-moves deleted    |

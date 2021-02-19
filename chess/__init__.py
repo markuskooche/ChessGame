@@ -19,7 +19,7 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
                             'yellow': (250, 250, 140), 'red': (250, 110, 70)}
 
 
-ENGINEERING_MODE: bool = False
+ENGINEERING_MODE: bool = True
 
 
 class Game:

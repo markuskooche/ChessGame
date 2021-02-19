@@ -62,7 +62,7 @@ class King(Figure):
 
         # TODO: add 'castling'
 
-        positions: list[object] = []
+        moves: list[object] = []
 
         for (row_off, column_off) in offsets:
             new_column: int = self.column + column_off
@@ -76,24 +76,25 @@ class King(Figure):
                         board.move_piece(move)
 
                         if not self.__square_under_attack(move.end_row, move.end_column, board):
-                            positions.append(move)
+                            moves.append(move)
                         board.undo_move()
                     else:
-                        positions.append(move)
+                        moves.append(move)
 
-        # TODO: add 'checked moves by king'
-        """
+        # remove moves that the opponent's king can also reach
+        enemy_king = self.player.opponent.king_position
         for (row_off, column_off) in offsets:
-            offset_column = self.column + 2 * row_off
-            offset_row = self.row + 2 * column_off
+            enemy_column = enemy_king[1] + column_off
+            enemy_row = enemy_king[0] + row_off
 
-            if (offset_row in range(0, 8)) and (offset_column in range(0, 8)):
-                figure = board.get_piece(offset_row, offset_column)
-                if isinstance(figure, King):
-                    print('NOT ALLOWED:', offset_row, offset_column)
-        """
+            if (enemy_row in range(0, 8)) and (enemy_column in range(0, 8)):
+                for i in range((len(moves) - 1), -1, -1):
+                    move = moves[i]
 
-        return positions
+                    if (enemy_row == move.end_row) and (enemy_column == move.end_column):
+                        moves.remove(move)
+
+        return moves
 
     def __repr__(self) -> str:
         return 'K' if self.player.color[0] == 'w' else 'k'
