@@ -1,6 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 
 from time import process_time
 
@@ -18,7 +18,7 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
                             'yellow': (250, 250, 140), 'red': (250, 110, 70)}
 
 
-ENGINEERING_MODE: bool = True
+ENGINEERING_MODE: bool = False
 
 
 class Game:

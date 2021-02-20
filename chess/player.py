@@ -4,6 +4,7 @@ import base64
 import sys
 import os
 
+
 COLORS: list[str] = ['white', 'black']
 
 

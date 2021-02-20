@@ -59,6 +59,7 @@ class King(Figure):
 
     def legal_moves(self, board: object, pins: list = ()) -> list[object]:
         offsets: list[tuple] = [(-1, 0), (0, 1), (1, 0), (0, -1), (-1, -1), (-1, 1), (1, 1), (1, -1)]
+        start = (self.row, self.column)
 
         # TODO: add 'castling'
 
@@ -71,7 +72,7 @@ class King(Figure):
             if (new_row in range(0, 8)) and (new_column in range(0, 8)):
                 figure = board.get_piece(row=new_row, column=new_column)
                 if figure.player is not self.player:
-                    move = Move((self.row, self.column), (new_row, new_column), board)
+                    move = Move(start, (new_row, new_column), board)
                     if isinstance(self.player, ComputerizedPlayer):
                         board.move_piece(move)
 
@@ -93,6 +94,38 @@ class King(Figure):
 
                     if (enemy_row == move.end_row) and (enemy_column == move.end_column):
                         moves.remove(move)
+
+        queen_side_castling = False
+        king_side_castling = False
+
+        # check if castling is allowed
+        if self.player.color == 'white':
+            queen_side_castling = board.castling_log[-1][0]
+            king_side_castling = board.castling_log[-1][1]
+        elif self.player.color == 'black':
+            queen_side_castling = board.castling_log[-1][2]
+            king_side_castling = board.castling_log[-1][3]
+
+        if queen_side_castling:
+            # check if all spots are blank
+            if isinstance(board.get_piece(self.row, (self.column - 1)), Blank) and \
+                    isinstance(board.get_piece(self.row, (self.column - 2)), Blank) and \
+                    isinstance(board.get_piece(self.row, (self.column - 3)), Blank):
+                # check if the spots are not under attack
+                if not self.__square_under_attack(self.row, self.column, board) and \
+                        not self.__square_under_attack(self.row, (self.column - 1), board) and \
+                        not self.__square_under_attack(self.row, (self.column - 2), board):
+                    moves.append(Move(start, (self.row, (self.column - 2)), board, castle_move=True))
+
+        if king_side_castling:
+            # check if all spots are blank
+            if isinstance(board.get_piece(self.row, (self.column + 1)), Blank) and \
+                    isinstance(board.get_piece(self.row, (self.column + 2)), Blank):
+                # check if the spots are not under attack
+                if not self.__square_under_attack(self.row, self.column, board) and \
+                        not self.__square_under_attack(self.row, (self.column + 1), board) and \
+                        not self.__square_under_attack(self.row, (self.column + 2), board):
+                    moves.append(Move(start, (self.row, (self.column + 2)), board, castle_move=True))
 
         return moves
 

@@ -2,15 +2,17 @@ import chess.figures as figure
 
 
 class Move:
-    def __init__(self, start_position: tuple, end_position: tuple, board: object, en_passant: bool = False):
-        self.start_row = start_position[0]
-        self.start_column = start_position[1]
+    def __init__(self, start: tuple, end: tuple, board: object, en_passant: bool = False, castle_move: bool = False):
+        self.start_row = start[0]
+        self.start_column = start[1]
 
-        self.end_row = end_position[0]
-        self.end_column = end_position[1]
+        self.end_row = end[0]
+        self.end_column = end[1]
 
         self.moved_piece = board.get_piece(self.start_row, self.start_column)
         self.captured_piece = board.get_piece(self.end_row, self.end_column)
+
+        self.castle_move = castle_move
 
         self.is_pawn_promotion = False
         self.is_en_passant = en_passant

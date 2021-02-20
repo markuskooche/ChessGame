@@ -9,6 +9,10 @@ class Board:
         self.white_move = True
         self.board = numpy.empty((8, 8), dtype=object)
 
+        # [i][0] = white_queen_side_castling, [i][1] = white_king_side_castling
+        # [i][2] = black_queen_side_castling, [i][3] = clack_king_side_castling
+        self.castling_log: list[tuple] = [(True, True, True, True)]
+
         white: object = players.get('1')
         black: object = players.get('2')
 
@@ -51,12 +55,11 @@ class Board:
         self.board[move.start_row][move.start_column] = figure.Blank(move.start_row, move.start_column)
         self.board[move.end_row][move.end_column] = move.moved_piece
         move.moved_piece.set_position(move.end_row, move.end_column)
+        player = move.moved_piece.player
 
         # updating the kings position
         if isinstance(move.moved_piece, figure.King):
             move.moved_piece.player.king_position = (move.end_row, move.end_column)
-
-        player = move.moved_piece.player
 
         # pawn promotion
         if move.is_pawn_promotion:
@@ -89,6 +92,12 @@ class Board:
         if move.is_en_passant:
             self.board[move.start_row][move.end_column] = figure.Blank(move.start_row, move.end_column)
 
+        # castling move
+        self.castling_move(move)
+
+        # update castling rights
+        self.update_castling(move, player)
+
         self.white_move = not self.white_move
         self.move_log.append(move)
 
@@ -111,11 +120,69 @@ class Board:
                 pawn = figure.Pawn(enemy, move.start_row, move.end_column)
                 self.board[move.start_row][move.end_column] = pawn
 
+            # castling move
+            self.castling_move(move)
+
+            # reset castling rights
+            self.reset_castling(move)
+
             return True
 
         # important for setting the player back to 1
         else:
             return False
+
+    def update_castling(self, move: object, player: object):
+        castling_log_length = len(self.castling_log) - 1
+
+        white_queen_side = self.castling_log[castling_log_length][0]
+        white_king_side = self.castling_log[castling_log_length][1]
+        black_queen_side = self.castling_log[castling_log_length][2]
+        black_king_side = self.castling_log[castling_log_length][3]
+
+        if isinstance(move.moved_piece, figure.King):
+            if player.color == 'white':
+                white_queen_side = False
+                white_king_side = False
+            elif player.color == 'black':
+                black_queen_side = False
+                black_king_side = False
+
+            self.castling_log.append((white_queen_side, white_king_side, black_queen_side, black_king_side))
+        elif isinstance(move.moved_piece, figure.Rook):
+            # disable queen side castling if left rook has moved
+            if move.start_column == 0:
+                if player.color == 'white':
+                    white_queen_side = False
+                elif player.color == 'black':
+                    black_queen_side = False
+
+            # disable king side castling if right rook has moved
+            elif move.start_column == 7:
+                if player.color == 'white':
+                    white_king_side = False
+                elif player.color == 'black':
+                    black_king_side = False
+
+            self.castling_log.append((white_queen_side, white_king_side, black_queen_side, black_king_side))
+
+    def reset_castling(self, move: object):
+        if isinstance(move.moved_piece, figure.King) or isinstance(move.moved_piece, figure.Rook):
+            self.castling_log.pop()
+
+    def castling_move(self, move: object):
+        if move.castle_move:
+            # queen side castling move
+            if (move.start_column - move.end_column) == 2:
+                # swapping the rook with the blank piece
+                self.board[move.end_row][0], self.board[move.end_row][move.end_column + 1] = \
+                    self.board[move.end_row][move.end_column + 1], self.board[move.end_row][0]
+
+            # king side castling move
+            elif (move.start_column - move.end_column) == -2:
+                # swapping the rook with the blank piece
+                self.board[move.end_row][7], self.board[move.end_row][move.end_column - 1] = \
+                    self.board[move.end_row][move.end_column - 1], self.board[move.end_row][7]
 
     def print_console(self):
         for r in range(8):
