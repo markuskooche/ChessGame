@@ -1,7 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.3.2"
-
+__version__ = "0.3.4"
 
 from time import process_time
 
@@ -83,7 +82,7 @@ class Game:
                         start = process_time()
                         self.valid_moves = actual_player.legal_moves(self.board)
                         end = process_time()
-                        print(f"'{actual_player.name}' TIME: {round(((end - start) * 1000), 2)}ms")
+                        # print(f"'{actual_player.name}' TIME: {round(((end - start) * 1000), 2)}ms")
 
                         for valid_move in self.valid_moves:
                             if (valid_move.start_row == selected[0]) and (valid_move.start_column == selected[1]):
@@ -95,12 +94,37 @@ class Game:
 
                     # a piece is already selected but no final position yet
                     elif len(saved_selection) == 2:
+                        check_move: object = Move(saved_selection, selected, self.board)
+                        for i in range(len(self.valid_moves)):
+                            valid_move = self.valid_moves[i]
+                            if check_move.code() == valid_move.code():
+                                self.board.move_piece(self.valid_moves[i])
+                                self.player = (self.player % 2) + 1
+                                selected_move = None
+                                saved_selection = ()
+
+                                if not ENGINEERING_MODE:
+                                    # if it is a 'ComputerizedPlayer' a computerized move is executed
+                                    if isinstance(self.players.get(str(self.player)), ComputerizedPlayer):
+                                        start = process_time()
+                                        best_move = self.players.get(str(self.player)).best_move(self.board)
+                                        end = process_time()
+                                        # print(f"'{actual_player.opponent.name}' TIME: {round(((end - start) * 1000), 2)}ms")
+                                        # print()
+                                        self.player = (self.player % 2) + 1
+                                        self.board.move_piece(best_move)
+
+                                self.__draw()
+                                break
+
+                        """
                         for valid_move in self.valid_moves:
                             check_move: object = Move(saved_selection, selected, self.board)
                             if check_move.code() == valid_move.code():
                                 selected_move = check_move
                                 saved_selection = ()
                                 break
+                        """
 
                     # the selected piece is not your own piece
                     else:
@@ -118,8 +142,8 @@ class Game:
                                 start = process_time()
                                 best_move = self.players.get(str(self.player)).best_move(self.board)
                                 end = process_time()
-                                print(f"'{actual_player.opponent.name}' TIME: {round(((end - start) * 1000), 2)}ms")
-                                print()
+                                # print(f"'{actual_player.opponent.name}' TIME: {round(((end - start) * 1000), 2)}ms")
+                                # print()
                                 self.player = (self.player % 2) + 1
                                 self.board.move_piece(best_move)
 

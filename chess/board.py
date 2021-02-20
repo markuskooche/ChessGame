@@ -1,3 +1,4 @@
+from chess.player import ComputerizedPlayer
 import chess.figures as figure
 import numpy
 
@@ -50,8 +51,34 @@ class Board:
         self.board[move.start_row][move.start_column] = figure.Blank(move.start_row, move.start_column)
         self.board[move.end_row][move.end_column] = move.moved_piece
         move.moved_piece.set_position(move.end_row, move.end_column)
+
+        # updating the kings position
         if isinstance(move.moved_piece, figure.King):
             move.moved_piece.player.king_position = (move.end_row, move.end_column)
+
+        # pawn promotion
+        if move.is_pawn_promotion:
+            player = move.moved_piece.player
+
+            # TODO: detect which promotion is the best [Knight or Queen]
+            if isinstance(player, ComputerizedPlayer):
+                self.board[move.end_row][move.end_column] = figure.Queen(player, move.end_row, move.end_column)
+            else:
+                entry = None
+
+                # TODO: create a popup window where you can select a figure
+                while entry not in ['N', 'B', 'R', 'Q']:
+                    entry = input('Enter Pawn Promotion [N, B, R, Q]: ').upper()
+
+                if entry == 'N':
+                    self.board[move.end_row][move.end_column] = figure.Knight(player, move.end_row, move.end_column)
+                elif entry == 'B':
+                    self.board[move.end_row][move.end_column] = figure.Bishop(player, move.end_row, move.end_column)
+                elif entry == 'R':
+                    self.board[move.end_row][move.end_column] = figure.Rook(player, move.end_row, move.end_column)
+                elif entry == 'Q':
+                    self.board[move.end_row][move.end_column] = figure.Queen(player, move.end_row, move.end_column)
+
         self.white_move = not self.white_move
         self.move_log.append(move)
 
