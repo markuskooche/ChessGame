@@ -133,7 +133,6 @@ class Pawn(Figure):
         super().__init__(player=player, row=row, column=column, figure='pawn', evaluation=1)
         self.initial_position: bool = True
 
-    # TODO: add 'pawn_conversion'
     # TODO: add 'en passant'
 
     def legal_moves(self, board: object, pins: list = ()) -> list[object]:
@@ -152,18 +151,20 @@ class Pawn(Figure):
                     pinned = True
                     break
 
+        start = (self.row, self.column)
+
         if new_position[0] in range(0, 8):
             figure = board.get_piece(new_position[0], new_position[1])
             if isinstance(figure, Blank):
                 # pinned is only significant for ComputerizedPlayer
                 if (not pinned) or (pinned_direction == pinning_direction):
-                    moves.append(Move((self.row, self.column), new_position, board))
+                    moves.append(Move(start, new_position, board))
 
                     # if pawn is on starting position and there is no opponent in front of him
                     if ((self.row == 6) and (direction == -1)) or ((self.row == 1) and (direction == 1)):
                         new_position: tuple = (self.row + (2 * direction), self.column)
                         if type(board.get_piece(new_position[0], new_position[1])) is Blank:
-                            moves.append(Move((self.row, self.column), new_position, board))
+                            moves.append(Move(start, new_position, board))
 
         # a pawn captures diagonally forward one square to the left or right
         offsets: list[tuple] = [(direction, -1), (direction, 1)]
@@ -172,21 +173,29 @@ class Pawn(Figure):
             new_column: int = self.column + column_off
             new_row: int = self.row + row_off
 
+            end: tuple[int, int] = (new_row, new_column)
+
             if (new_row in range(0, 8)) and (new_column in range(0, 8)):
                 figure = board.get_piece(row=new_row, column=new_column)
 
                 # if pawn is a pinned piece it is only allowed to capture vertically checking pieces
-                if (figure.player is not self.player) and (type(figure) != Blank):
-                    capture_pinning = False
+                if figure.player is not self.player:
+                    if type(figure) != Blank:
+                        # capture_pinning = False
 
-                    if pinned:
-                        # if the pawn can capture the checking piece, it is a legal move
-                        capturing_column = self.column + pinned_direction[1]
-                        capturing_row = self.row + pinned_direction[0]
-                        capture_pinning = (capturing_row == new_row) and (capturing_column == new_column)
+                        if pinned:
+                            # if the pawn can capture the checking piece, it is a legal move
+                            capturing_column = self.column + pinned_direction[1]
+                            capturing_row = self.row + pinned_direction[0]
 
-                    if (not pinned) or (pinned_direction == pinning_direction) or capture_pinning:
-                        moves.append(Move((self.row, self.column), (new_row, new_column), board))
+                            if (capturing_row == new_row) and (capturing_column == new_column):
+                                moves.append(Move(start, end, board))
+                        elif not pinned:
+                            moves.append(Move(start, end, board))
+                    else:
+                        # if a pawn is not pinned and the enemy pawn is able to capture because of en passant
+                        if (not pinned) and (self.player.opponent.en_passant == end):
+                            moves.append(Move(start, end, board, en_passant=True))
 
         return moves
 

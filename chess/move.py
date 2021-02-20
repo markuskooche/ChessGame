@@ -2,7 +2,7 @@ import chess.figures as figure
 
 
 class Move:
-    def __init__(self, start_position: tuple, end_position: tuple, board: object):
+    def __init__(self, start_position: tuple, end_position: tuple, board: object, en_passant: bool = False):
         self.start_row = start_position[0]
         self.start_column = start_position[1]
 
@@ -13,9 +13,10 @@ class Move:
         self.captured_piece = board.get_piece(self.end_row, self.end_column)
 
         self.is_pawn_promotion = False
+        self.is_en_passant = en_passant
 
-        # recognizes a pawn promotion move
         if isinstance(self.moved_piece, figure.Pawn):
+            # recognizes a pawn promotion move
             color = self.moved_piece.player.color
             if (color == 'white' and self.end_row == 0) or (color == 'black' and self.end_row == 7):
                 self.is_pawn_promotion = True

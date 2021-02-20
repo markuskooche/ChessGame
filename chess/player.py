@@ -21,6 +21,8 @@ class Player(ABC):
             elif color == 'black':
                 self.king_position = (0, 4)
 
+        self.en_passant: tuple = ()
+
     def set_opponent(self, board):
         if self.opponent is None:
             for r in range(8):

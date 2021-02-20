@@ -1,6 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 
 from time import process_time
 
@@ -23,9 +23,9 @@ ENGINEERING_MODE: bool = True
 
 class Game:
     players: dict = {
-        '1': HumanPlayer(color='white', name='Markus'),
+        # '1': HumanPlayer(color='white', name='Markus'),
         # '2': HumanPlayer(color='black', name='Random')
-        # '1': RandomPlayer(color='white'),
+        '1': RandomPlayer(color='white'),
         '2': RandomPlayer(color='black')
     }
 
@@ -118,6 +118,7 @@ class Game:
                                 break
 
                         """
+                        # maybe delete this later
                         for valid_move in self.valid_moves:
                             check_move: object = Move(saved_selection, selected, self.board)
                             if check_move.code() == valid_move.code():

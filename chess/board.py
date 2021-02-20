@@ -56,10 +56,10 @@ class Board:
         if isinstance(move.moved_piece, figure.King):
             move.moved_piece.player.king_position = (move.end_row, move.end_column)
 
+        player = move.moved_piece.player
+
         # pawn promotion
         if move.is_pawn_promotion:
-            player = move.moved_piece.player
-
             # TODO: detect which promotion is the best [Knight or Queen]
             if isinstance(player, ComputerizedPlayer):
                 self.board[move.end_row][move.end_column] = figure.Queen(player, move.end_row, move.end_column)
@@ -79,6 +79,16 @@ class Board:
                 elif entry == 'Q':
                     self.board[move.end_row][move.end_column] = figure.Queen(player, move.end_row, move.end_column)
 
+        # update player.en_passant on 2 square pawn moves
+        if isinstance(move.moved_piece, figure.Pawn) and abs(move.start_row - move.end_row):
+            player.en_passant = ((move.start_row + move.end_row) // 2, move.end_column)
+        else:
+            player.en_passant = ()
+
+        # en passant move
+        if move.is_en_passant:
+            self.board[move.start_row][move.end_column] = figure.Blank(move.start_row, move.end_column)
+
         self.white_move = not self.white_move
         self.move_log.append(move)
 
@@ -94,6 +104,13 @@ class Board:
             if isinstance(move.moved_piece, figure.King):
                 move.moved_piece.player.king_position = (move.start_row, move.start_column)
             self.white_move = not self.white_move
+
+            # resets the captured pawn
+            if move.is_en_passant:
+                enemy = move.moved_piece.player.opponent
+                pawn = figure.Pawn(enemy, move.start_row, move.end_column)
+                self.board[move.start_row][move.end_column] = pawn
+
             return True
 
         # important for setting the player back to 1
