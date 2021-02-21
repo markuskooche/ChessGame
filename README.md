@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.3.6
+Current Version: 0.4
 
 ## how to start the game
 please install python3, pygame and numpy
@@ -33,3 +33,4 @@ To delete a selection, press the key 'd'.
 | 0.3.4   | pawn promotion added                  |
 | 0.3.5   | en passant added                      |
 | 0.3.6   | castling added                        |
+| 0.4     | code was revised and ui stuff added   |
