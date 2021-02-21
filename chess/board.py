@@ -58,6 +58,7 @@ class Board:
         """
         Executes the move and updates the board and the position of the piece.
         """
+        # print(f'{move.moved_piece} ({move.start_row}, {move.start_column})->({move.end_row}, {move.end_column}) => {move.castle_move}')
 
         self.board[move.start_row][move.start_column] = p.Blank(move.start_row, move.start_column)
         self.board[move.end_row][move.end_column] = move.moved_piece
@@ -190,6 +191,7 @@ class Board:
         """
 
         if move.castle_move:
+            print('castling move')
             # queen side castling move
             if (move.start_column - move.end_column) == 2:
                 # swapping the rook with the blank piece

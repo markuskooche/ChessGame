@@ -20,6 +20,12 @@ class Move:
 
         self.castle_move = castle_move
 
+        if self.start_row == self.end_row and self.start_column == 4 and self.end_column == 2:
+            print('CASTLING MOVE', castle_move)
+            if not self.castle_move:
+                print('ERROR')
+                self.castle_move = True
+
         self.is_pawn_promotion = False
         self.is_en_passant = en_passant
 

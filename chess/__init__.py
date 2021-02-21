@@ -1,8 +1,8 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.4"
+__version__ = "0.4.1"
 
-from time import process_time
+from time import sleep
 
 import chess.pieces as p
 import pygame
@@ -12,14 +12,10 @@ from chess.player import ComputerizedPlayer
 from chess.board import Board
 from chess.move import Move
 
-
 SIZE: int = 60
 IMAGES: dict = {}
 COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
-                            'green': (0, 255, 0), 'yellow': (255, 255, 0), 'red': (250, 110, 70)}
-
-
-ENGINEERING_MODE: bool = False
+                            'green': (0, 255, 0), 'yellow': (255, 255, 0), 'red': (255, 0, 0)}
 
 
 class Game:
@@ -33,9 +29,7 @@ class Game:
     def __init__(self):
         Game.load_pieces()
 
-        selected_move: object = None
-        saved_selection: tuple = ()
-        running: bool = True
+        self.running: bool = True
 
         pygame.init()
         pygame.display.set_caption('Chess')
@@ -45,103 +39,88 @@ class Game:
         self.display = pygame.display.set_mode((8 * SIZE, 8 * SIZE))
         self.player: int = 1
 
+        self.human_moves: list[tuple] = []
+
         self.__draw()
 
-        while running:
+        while self.running:
+            current_player = self.players.get(str(self.player))
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running: bool = False
+                    self.running: bool = False
 
                 elif event.type == pygame.KEYDOWN:
+                    # start a new game
+                    if event.key == pygame.K_n:
+                        self.board = Board(self.players)
+                        self.players.get('1').set_enemy(self.board)
+                        self.players.get('2').set_enemy(self.board)
+                        self.player: int = 1
+
                     # undoes the last move
-                    if event.key == pygame.K_r:
+                    elif event.key == pygame.K_r:
                         # sets the player to 1 if move_log is empty
                         if self.board.undo_move():
                             self.player = (self.player % 2) + 1
                         else:
                             self.player = 1
 
-                        saved_selection: tuple = ()
-                        self.__draw()
-
                     # removes the selection
                     elif event.key == pygame.K_d:
-                        saved_selection: tuple = ()
-                        self.__draw()
+                        self.human_moves = []
+
+                    self.__draw()
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    location: tuple = pygame.mouse.get_pos()
-                    column: int = location[0] // SIZE
-                    row: int = location[1] // SIZE
+                    if isinstance(current_player, HumanPlayer):
+                        location: tuple = pygame.mouse.get_pos()
+                        column: int = location[0] // SIZE
+                        row: int = location[1] // SIZE
 
-                    selected: tuple = (row, column)
-                    selected_figure: object = self.board.get_piece(row=selected[0], column=selected[1])
-                    actual_player: object = self.players.get(str(self.player))
+                        chosen_piece: object = self.board.get_piece(row, column)
 
-                    # no valid piece is selected yet
-                    if (len(saved_selection) == 0) and (selected_figure.player == actual_player):
-                        start = process_time()
-                        self.valid_moves = actual_player.legal_moves(self.board)
-                        end = process_time()
-                        print(f"'{actual_player.name}' TIME: {round(((end - start) * 1000), 2)}ms")
+                        if len(self.human_moves) == 0 and (chosen_piece.player == current_player):
+                            moves = chosen_piece.legal_moves(self.board)
 
-                        for valid_move in self.valid_moves:
-                            if (valid_move.start_row == selected[0]) and (valid_move.start_column == selected[1]):
-                                self.highlight(selected_figure.legal_moves(self.board), selected)
-                                saved_selection = selected
-                                break
+                            if len(moves) != 0:
+                                start_column = moves[0].start_column
+                                start_row = moves[0].start_row
 
-                    # a piece is already selected but no final position yet
-                    elif len(saved_selection) == 2:
-                        check_move: object = Move(saved_selection, selected, self.board)
-                        for i in range(len(self.valid_moves)):
-                            valid_move = self.valid_moves[i]
+                                self.human_moves = moves
+                                self.highlight(self.human_moves, (start_row, start_column))
+                            else:
+                                self.highlight([], (row, column), color='red')
 
-                            if check_move.code() == valid_move.code():
-                                self.animate_move(valid_move)
-                                self.board.move_piece(self.valid_moves[i])
-                                self.player = (self.player % 2) + 1
-                                selected_move = None
-                                saved_selection = ()
+                        if len(self.human_moves) != 0:
+                            for human_move in self.human_moves:
+                                if (human_move.end_row == row) and (human_move.end_column == column):
+                                    # start = (human_move.start_row, human_move.start_column)
+                                    # end = (human_move.end_row, human_move.end_column)
+                                    # current_player.set_move(Move(start, end, self.board))
+                                    current_player.set_move(human_move)
+                                    self.human_moves = []
 
-                                if not ENGINEERING_MODE:
-                                    # if it is a 'ComputerizedPlayer' a computerized move is executed
-                                    if isinstance(self.players.get(str(self.player)), ComputerizedPlayer):
-                                        start = process_time()
-                                        best_move = self.players.get(str(self.player)).best_move(self.board)
-                                        end = process_time()
-                                        print(f"'{actual_player.enemy.name}' TIME: {round(((end - start) * 1000), 2)}ms")
-                                        print()
-                                        self.player = (self.player % 2) + 1
-                                        self.board.move_piece(best_move)
+            next_move = current_player.best_move(self.board)
 
-                                self.__draw()
-                                break
+            if next_move is not None:
+                if isinstance(current_player, ComputerizedPlayer):
+                    moving_piece = next_move.moved_piece
+                    start = (next_move.start_row, next_move.start_column)
+                    self.highlight(moving_piece.legal_moves(self.board), start)
+                    sleep(1)
+                elif isinstance(current_player, HumanPlayer):
+                    current_player.set_move(None)
 
-                    # the selected piece is not your own piece
-                    # else:
-                        # self.__highlight_spot(position=selected, color=COLORS.get('red'))
+                if self.running:
+                    self.animate_move(next_move)
+                    self.board.move_piece(next_move)
 
-                    # moves the selected piece with a valid move
-                    if selected_move is not None:
-                        self.board.move_piece(selected_move)
-                        self.player = (self.player % 2) + 1
-                        selected_move = None
+                self.player = (self.player % 2) + 1
+                self.__draw()
+                sleep(0.5)
 
-                        if not ENGINEERING_MODE:
-                            # if it is a 'ComputerizedPlayer' a computerized move is executed
-                            if isinstance(self.players.get(str(self.player)), ComputerizedPlayer):
-                                start = process_time()
-                                best_move = self.players.get(str(self.player)).best_move(self.board)
-                                end = process_time()
-                                # print(f"'{actual_player.enemy.name}' TIME: {round(((end - start) * 1000), 2)}ms")
-                                # print()
-                                self.player = (self.player % 2) + 1
-                                self.board.move_piece(best_move)
-
-                        self.__draw()
-
-    def highlight(self, valid_moves, selected):
+    def highlight(self, valid_moves, selected, color='green'):
         self.__draw_board()
 
         if selected != ():
@@ -152,7 +131,7 @@ class Game:
             square.set_alpha(100)
 
             # highlight selected square
-            square.fill(pygame.Color(COLORS.get('green')))
+            square.fill(pygame.Color(COLORS.get(color)))
             self.display.blit(square, (c * SIZE, r * SIZE))
 
             # highlight squares which valid moves
@@ -167,7 +146,7 @@ class Game:
 
         self.__draw_pieces()
 
-    def animate_move(self, selected_move):
+    def animate_move(self, selected_move: object):
         clock = pygame.time.Clock()
 
         start_column = selected_move.start_column
@@ -186,14 +165,13 @@ class Game:
         frame_count = (abs(direction_r) + abs(direction_c)) * frames_per_square
 
         for frame in range(frame_count + 1):
-            column = (start_column + (direction_c * frame/frame_count))
+            column = (start_column + (direction_c * frame / frame_count))
             row = (start_row + (direction_r * frame / frame_count))
 
             self.__draw_board()
             self.__draw_pieces()
 
             end_square = pygame.Rect(end_column * SIZE, end_row * SIZE, SIZE, SIZE)
-            # pygame.draw.rect(self.display, COLORS.get('yellow'), end_square)
 
             captured_piece = selected_move.captured_piece
             if not isinstance(captured_piece, p.Blank):

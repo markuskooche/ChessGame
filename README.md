@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.4
+Current Version: 0.4.1
 
 ## how to start the game
 please install python3, pygame and numpy
@@ -17,6 +17,7 @@ Click on another field to execute the move.
 
 To reset a move, press the key 'r'.
 To delete a selection, press the key 'd'.
+To start a new game, press the key 'n'.
 
 ## changelog
 | version | changelog                             |
@@ -34,3 +35,4 @@ To delete a selection, press the key 'd'.
 | 0.3.5   | en passant added                      |
 | 0.3.6   | castling added                        |
 | 0.4     | code was revised and ui stuff added   |
+| 0.4.1   | game class was revised for player     |
