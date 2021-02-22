@@ -1,6 +1,6 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 from time import sleep
 
