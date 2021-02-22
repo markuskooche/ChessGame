@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.4.1
+Current Version: 0.4.2
 
 ## How to install the game
 First you have to install all requirements.
