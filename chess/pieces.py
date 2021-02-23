@@ -74,7 +74,7 @@ class King(Piece):
     """
 
     def __init__(self, player: object, row: int, column: int):
-        super().__init__(player=player, row=row, column=column, name='king', evaluation=9)
+        super().__init__(player=player, row=row, column=column, name='king', evaluation=0)
 
     def is_check(self, board: object) -> bool:
         """
@@ -320,6 +320,7 @@ class Pawn(Piece):
                 # if pawn is a pinned piece it is only allowed to capture vertically checking pieces
                 if piece.player is not self.player:
                     if type(piece) != Blank:
+                        # TODO: I think i should disable en passant here completely
                         if pinned:
                             # if the pawn can capture the checking piece, it is a legal move
                             capturing_column = self.column + pinned_direction[1]
@@ -347,7 +348,7 @@ class Queen(Piece):
     """
 
     def __init__(self, player: object, row: int, column: int):
-        super().__init__(player=player, row=row, column=column, name='queen', evaluation=10)
+        super().__init__(player=player, row=row, column=column, name='queen', evaluation=9)
 
     def legal_moves(self, board: object, pins: list = ()) -> list[object]:
         """

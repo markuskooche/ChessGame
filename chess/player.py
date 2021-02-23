@@ -14,8 +14,11 @@ class Player(ABC):
 
     def __init__(self, color: str, name: str):
         self.enemy: object = None
-        self.color = color
-        self.name = name
+        self.color: str = color
+        self.name: str = name
+
+        self.is_checkmate: bool = False
+        self.is_stalemate: bool = False
 
         self.en_passant: tuple = ()
 
@@ -72,6 +75,16 @@ class Player(ABC):
         for piece in self.get_pieces(board):
             for move in piece.legal_moves(board, pins):
                 moves.append(move)
+
+        if len(moves) == 0:
+            king_column = self.king_position[1]
+            king_row = self.king_position[0]
+            king = board.get_piece(king_row, king_column)
+
+            if king.is_check(board):
+                self.is_checkmate = True
+            else:
+                self.is_stalemate = True
 
         return moves
 
@@ -244,6 +257,22 @@ class ComputerizedPlayer(Player, ABC):
                     if (end_piece.player.color != self.color) and (isinstance(end_piece, p.Knight)):
                         self.checks.append((end_row, end_column, knight_offset[0], knight_offset[1]))
                         self.in_check = True
+
+    @staticmethod
+    def score_board(board: object):
+        score = 0
+
+        for r in range(8):
+            for c in range(8):
+                piece = board.get_piece(r, c)
+
+                if piece.player is not None:
+                    if piece.player.color == 'white':
+                        score += piece.evaluation
+                    elif piece.player.color == 'black':
+                        score -= piece.evaluation
+
+        return score
 
     @abstractmethod
     def best_move(self, board: object) -> object:

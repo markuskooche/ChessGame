@@ -1,13 +1,13 @@
 __author__ = "Markus Koch"
 __status__ = "Production"
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 
 from time import sleep
 
 import chess.pieces as p
 import pygame
 
-from chess.players import HumanPlayer, RandomPlayer
+from chess.players import HumanPlayer, RandomPlayer, MiniMaxIterativePlayer
 from chess.player import ComputerizedPlayer
 from chess.board import Board
 from chess.move import Move
@@ -20,10 +20,8 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
 
 class Game:
     players: dict = {
-        '1': HumanPlayer(color='white', name='Markus'),
-        # '2': HumanPlayer(color='black', name='Random')
-        # '1': RandomPlayer(color='white'),
-        '2': RandomPlayer(color='black')
+        '1': HumanPlayer(color='white', name='Human'),
+        '2': MiniMaxIterativePlayer(color='black')
     }
 
     def __init__(self):
@@ -95,9 +93,6 @@ class Game:
                         if len(self.human_moves) != 0:
                             for human_move in self.human_moves:
                                 if (human_move.end_row == row) and (human_move.end_column == column):
-                                    # start = (human_move.start_row, human_move.start_column)
-                                    # end = (human_move.end_row, human_move.end_column)
-                                    # current_player.set_move(Move(start, end, self.board))
                                     current_player.set_move(human_move)
                                     self.human_moves = []
 

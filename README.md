@@ -1,5 +1,5 @@
 # ChessGame
-Current Version: 0.4.2
+Current Version: 0.4.3
 
 ## How to install the game
 First you have to install all requirements.
@@ -67,3 +67,4 @@ python3 main.py
 | 0.4     | code was revised and ui stuff added   |
 | 0.4.1   | game class was revised for player     |
 | 0.4.2   | install and run files added           |
+| 0.4.3   | added new player classes              |
