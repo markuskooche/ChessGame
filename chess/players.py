@@ -162,7 +162,7 @@ class MiniMaxPlayer(ComputerizedPlayer):
     """
 
     def __init__(self, color: str, max_depth=3):
-        super().__init__(color=color, name='MiniMaxIterative')
+        super().__init__(color=color, name='MiniMaxPlayer')
         self.next_move = None
         self.MAX_DEPTH = max_depth
 
@@ -236,3 +236,12 @@ class MiniMaxPlayer(ComputerizedPlayer):
                 board.undo_move()
 
             return min_score
+
+
+class NegaScoutPlayer(ComputerizedPlayer):
+
+    def __init__(self, color: str, max_depth=3):
+        super().__init__(color=color, name='NegaScoutPlayer')
+
+    def best_move(self, board: object) -> object:
+        return None
