@@ -106,6 +106,10 @@ class ComputerizedPlayer(Player, ABC):
 
     def __init__(self, color: str, name: str):
         super().__init__(color=color, name=name)
+
+        self.CHECKMATE: int = 1000
+        self.STALEMATE: int = 0
+
         self.in_check = False
         self.checks = []
         self.pins = []
@@ -260,6 +264,31 @@ class ComputerizedPlayer(Player, ABC):
 
     @staticmethod
     def score_board(board: object):
+        score = 0
+
+        for r in range(8):
+            for c in range(8):
+                piece = board.get_piece(r, c)
+
+                if piece.player is not None:
+                    if piece.player.color == 'white':
+                        score += piece.evaluation
+                    elif piece.player.color == 'black':
+                        score -= piece.evaluation
+
+        return score
+
+    def score_board_improved(self, board: object):
+        if self.is_checkmate:
+            return - self.CHECKMATE
+        elif self.is_stalemate:
+            return self.STALEMATE
+
+        elif self.enemy.is_checkmate:
+            return self.CHECKMATE
+        elif self.enemy.is_stalemate:
+            return self.STALEMATE
+
         score = 0
 
         for r in range(8):

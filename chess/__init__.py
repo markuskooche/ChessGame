@@ -7,7 +7,7 @@ from time import sleep
 import chess.pieces as p
 import pygame
 
-from chess.players import HumanPlayer, RandomPlayer, MiniMaxIterativePlayer
+from chess.players import HumanPlayer, RandomPlayer, MiniMaxPlayer, MiniMaxIterativePlayer
 from chess.player import ComputerizedPlayer
 from chess.board import Board
 from chess.move import Move
@@ -21,7 +21,8 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
 class Game:
     players: dict = {
         '1': HumanPlayer(color='white', name='Human'),
-        '2': MiniMaxIterativePlayer(color='black')
+        # '1': RandomPlayer(color='white'),
+        '2': MiniMaxPlayer(color='black', max_depth=3)
     }
 
     def __init__(self):

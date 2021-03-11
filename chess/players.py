@@ -1,8 +1,8 @@
 from chess.player import Player, ComputerizedPlayer
 from random import choice, shuffle
 
-CHECKMATE: int = 1000
-STALEMATE: int = 0
+# CHECKMATE: int = 1000
+# STALEMATE: int = 0
 
 
 class HumanPlayer(Player):
@@ -78,7 +78,7 @@ class GreedyPlayer(ComputerizedPlayer):
         # to handle black and white players
         turn_multiplier = 1 if self.color == 'white' else -1
 
-        max_score = -CHECKMATE
+        max_score = - self.CHECKMATE
         best_move = None
 
         for player_move in self.legal_moves(board):
@@ -86,9 +86,9 @@ class GreedyPlayer(ComputerizedPlayer):
 
             # if the enemy has no legal ‚moves after this move before
             if not self.enemy.is_checkmate:
-                score = CHECKMATE
+                score = self.CHECKMATE
             elif self.enemy.is_stalemate:
-                score = STALEMATE
+                score = self.STALEMATE
             else:
                 score = turn_multiplier * ComputerizedPlayer.score_board(board)
 
@@ -118,7 +118,7 @@ class MiniMaxIterativePlayer(ComputerizedPlayer):
         # to handle black and white players
         turn_multiplier = 1 if self.color == 'white' else -1
 
-        enemy_min_max_score = CHECKMATE
+        enemy_min_max_score = self.CHECKMATE
         best_player_move = None
 
         # without shuffle he would prefer the rook, because it is in the first place
@@ -128,16 +128,16 @@ class MiniMaxIterativePlayer(ComputerizedPlayer):
         for player_move in valid_moves:
             board.move_piece(player_move)
             enemy_moves = self.enemy.legal_moves(board)
-            enemy_max_score = -CHECKMATE
+            enemy_max_score = - self.CHECKMATE
 
             for enemy_move in enemy_moves:
                 board.move_piece(enemy_move)
 
                 # if the enemy has no legal ‚moves after this move before
                 if self.enemy.is_checkmate:
-                    score = - turn_multiplier * CHECKMATE
+                    score = - turn_multiplier * self.CHECKMATE
                 elif self.enemy.is_stalemate:
-                    score = STALEMATE
+                    score = self.STALEMATE
                 else:
                     score = - turn_multiplier * ComputerizedPlayer.score_board(board)
 
@@ -155,61 +155,84 @@ class MiniMaxIterativePlayer(ComputerizedPlayer):
         return best_player_move
 
 
-class MiniMaxIterativePlayer(ComputerizedPlayer):
+class MiniMaxPlayer(ComputerizedPlayer):
     """
-    A 'MiniMaxIterativePlayer' is a computerized player and inherits from 'ComputerizedPlayer'.
-    He looks two moves ahead and chooses his own best move from them.
+    A 'MiniMaxPlayer' is a computerized player and inherits from 'ComputerizedPlayer'.
+    He chooses the best own move.
     """
 
-    def __init__(self, color: str):
+    def __init__(self, color: str, max_depth=3):
         super().__init__(color=color, name='MiniMaxIterative')
+        self.next_move = None
+        self.MAX_DEPTH = max_depth
 
     def best_move(self, board: object) -> object:
         """
-        Returns the best move after two iterations
+        Returns the best move by given depth.
         """
 
-        # to handle black and white players
-        turn_multiplier = 1 if self.color == 'white' else -1
+        # reset next move from before
+        self.next_move = None
 
-        enemy_min_max_score = CHECKMATE
-        best_player_move = None
+        is_white = self.color == 'white'
+        self.find_move(board, is_white, self.MAX_DEPTH)
 
-        # without shuffle he would prefer the rook, because it is in the first place
-        valid_moves = self.legal_moves(board)
-        shuffle(valid_moves)
+        return self.next_move
 
-        for player_move in valid_moves:
-            board.move_piece(player_move)
-            enemy_moves = self.enemy.legal_moves(board)
+    def find_move(self, board: object, is_white: bool, depth: int):
+        """
+        A recursive method to find the best move by given depth.
+        """
+        
+        if depth == 0:
+            return self.score_board_improved(board)
 
-            if self.is_checkmate:
-                enemy_max_score = - CHECKMATE
-            elif self.is_stalemate:
-                enemy_max_score = STALEMATE
+        valid_moves = []
+
+        if self.color == 'white':
+            if is_white:
+                valid_moves = self.legal_moves(board)
             else:
-                enemy_max_score = - CHECKMATE
+                valid_moves = self.enemy.legal_moves(board)
 
-                for enemy_move in enemy_moves:
-                    board.move_piece(enemy_move)
+        elif self.color == 'black':
+            if is_white:
+                valid_moves = self.enemy.legal_moves(board)
+            else:
+                valid_moves = self.legal_moves(board)
 
-                    # if the enemy has no legal ‚moves after this move before
-                    if self.enemy.is_checkmate:
-                        score = - turn_multiplier * CHECKMATE
-                    elif self.enemy.is_stalemate:
-                        score = STALEMATE
-                    else:
-                        score = - turn_multiplier * ComputerizedPlayer.score_board(board)
+        if is_white:
+            max_score = - self.CHECKMATE
 
-                    if score > enemy_max_score:
-                        enemy_max_score = score
+            for move in valid_moves:
+                board.move_piece(move)
+                # enemy_moves = self.enemy.legal_moves(board)
+                score = self.find_move(board, False, depth - 1)
 
-                    board.undo_move()
+                if score > max_score:
+                    max_score = score
 
-            if enemy_max_score < enemy_min_max_score:
-                enemy_min_max_score = enemy_max_score
-                best_player_move = player_move
+                    if depth == self.MAX_DEPTH:
+                        self.next_move = move
 
-            board.undo_move()
+                board.undo_move()
 
-        return best_player_move
+            return max_score
+
+        else:
+            min_score = self.CHECKMATE
+
+            for move in valid_moves:
+                board.move_piece(move)
+                # enemy_moves = self.enemy.legal_moves(board)
+                score = self.find_move(board, True, depth - 1)
+
+                if score < min_score:
+                    min_score = score
+
+                    if depth == self.MAX_DEPTH:
+                        self.next_move = move
+
+                board.undo_move()
+
+            return min_score
