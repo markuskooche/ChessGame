@@ -54,9 +54,10 @@ class Board:
 
         self.board[row][column] = piece
 
-    def move_piece(self, move: object):
+    def move_piece(self, move: object, move_finding: bool = False):
         """
         Executes the move and updates the board and the position of the piece.
+        Set move_finding to true if you call this method by a computerized player.
         """
 
         self.board[move.start_row][move.start_column] = p.Blank(move.start_row, move.start_column)
@@ -71,7 +72,7 @@ class Board:
         # pawn promotion
         if move.is_pawn_promotion:
             # TODO: detect which promotion is the best [Knight or Queen]
-            if isinstance(player, ComputerizedPlayer):
+            if isinstance(player, ComputerizedPlayer) or move_finding:
                 self.board[move.end_row][move.end_column] = p.Queen(player, move.end_row, move.end_column)
             else:
                 entry = None

@@ -6,6 +6,7 @@ from time import sleep
 
 import chess.pieces as p
 import pygame
+import sys
 
 from chess.players import HumanPlayer, RandomPlayer, MiniMaxPlayer, MiniMaxIterativePlayer
 from chess.player import ComputerizedPlayer
@@ -20,8 +21,9 @@ COLORS: dict[str, tuple] = {'white': (240, 240, 240), 'gray': (180, 180, 180),
 
 class Game:
     players: dict = {
-        '1': HumanPlayer(color='white', name='Human'),
-        # '1': RandomPlayer(color='white'),
+        # '1': HumanPlayer(color='white', name='Human'),
+        '1': RandomPlayer(color='white'),
+        # '1': MiniMaxPlayer(color='white', max_depth=3),
         '2': MiniMaxPlayer(color='black', max_depth=3)
     }
 
@@ -98,6 +100,11 @@ class Game:
                                     self.human_moves = []
 
             next_move = current_player.best_move(self.board)
+
+            if current_player.is_checkmate or current_player.is_stalemate:
+                print('print comes from inside init')
+                self.board.print_console()
+                sys.exit(1)
 
             if next_move is not None:
                 if isinstance(current_player, ComputerizedPlayer):

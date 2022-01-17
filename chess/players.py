@@ -82,7 +82,7 @@ class GreedyPlayer(ComputerizedPlayer):
         best_move = None
 
         for player_move in self.legal_moves(board):
-            board.move_piece(player_move)
+            board.move_piece(player_move, move_finding=True)
 
             # if the enemy has no legal ‚moves after this move before
             if not self.enemy.is_checkmate:
@@ -126,12 +126,12 @@ class MiniMaxIterativePlayer(ComputerizedPlayer):
         shuffle(valid_moves)
 
         for player_move in valid_moves:
-            board.move_piece(player_move)
+            board.move_piece(player_move, move_finding=True)
             enemy_moves = self.enemy.legal_moves(board)
             enemy_max_score = - self.CHECKMATE
 
             for enemy_move in enemy_moves:
-                board.move_piece(enemy_move)
+                board.move_piece(enemy_move, move_finding=True)
 
                 # if the enemy has no legal ‚moves after this move before
                 if self.enemy.is_checkmate:
@@ -205,7 +205,7 @@ class MiniMaxPlayer(ComputerizedPlayer):
             max_score = - self.CHECKMATE
 
             for move in valid_moves:
-                board.move_piece(move)
+                board.move_piece(move, move_finding=True)
                 # enemy_moves = self.enemy.legal_moves(board)
                 score = self.find_move(board, False, depth - 1)
 
@@ -223,7 +223,7 @@ class MiniMaxPlayer(ComputerizedPlayer):
             min_score = self.CHECKMATE
 
             for move in valid_moves:
-                board.move_piece(move)
+                board.move_piece(move, move_finding=True)
                 # enemy_moves = self.enemy.legal_moves(board)
                 score = self.find_move(board, True, depth - 1)
 

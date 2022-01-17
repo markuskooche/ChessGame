@@ -164,12 +164,11 @@ class ComputerizedPlayer(Player, ABC):
 
         if len(valid_moves) == 0:
             if self.in_check:
-                print('CHECKMATE')
+                # print('CHECKMATE')
+                self.is_checkmate = True
             else:
-                print('STALEMATE')
-
-            board.print_console()
-            sys.exit()
+                # print('STALEMATE')
+                self.is_stalemate = True
 
         return valid_moves
 
